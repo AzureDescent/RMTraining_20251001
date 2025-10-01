@@ -94,23 +94,35 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-HAL_TIM_Base_Start(&htim1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
+  while (1)   // 1
   {
-    if (__HAL_TIM_GetCounter(&htim1) > __HAL_TIM_GET_AUTORELOAD(&htim1) / 2)
+    is_Pressed = HAL_GPIO_ReadPin(KEY_W_GPIO_Port,KEY_W_Pin);
+    if (is_Pressed == 1)
     {
-      HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_SET);
-      HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET);
+      currentPressTime = HAL_GetTick();
+      if (currentPressTime - lastPressTime > 200)
+      {
+        counter++;
+        lastPressTime = currentPressTime;
+        if (CurrentLight==0)
+        {
+          HAL_GPIO_WritePin(LED_R_GPIO_Port,LED_R_Pin,GPIO_PIN_SET);  // Turn off RED
+          HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET);  //Turn on GREEN
+          CurrentLight=1;
+        }
+        else
+        {
+          HAL_GPIO_WritePin(LED_G_GPIO_Port,LED_G_Pin,GPIO_PIN_SET);  // Turn off GREEN
+          HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_RESET);  //Turn on RED
+          CurrentLight=0;
+        }
+      }
     }
-    else
-    {
-      HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_RESET);
-      HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_SET);
-    }
+    ticks=HAL_GetTick();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
