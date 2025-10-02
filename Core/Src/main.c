@@ -19,15 +19,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-#include <math.h>
-
 #include "iwdg.h"
 #include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <math.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -106,7 +104,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
-  {
+  { //This is a git trial.
     uint32_t arr_value = __HAL_TIM_GET_AUTORELOAD(&htim1) + 1;
     uint32_t brightness = arr_value * sinf(4 * HAL_GetTick()/1000.f)-1;
     __HAL_TIM_SetCompare(&htim1,TIM_CHANNEL_2,brightness);
