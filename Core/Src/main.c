@@ -18,6 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+
+#include <math.h>
+
+#include "iwdg.h"
 #include "tim.h"
 #include "gpio.h"
 
@@ -93,36 +97,23 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM1_Init();
+  MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)   // 1
+  while (1)
   {
-    is_Pressed = HAL_GPIO_ReadPin(KEY_W_GPIO_Port,KEY_W_Pin);
-    if (is_Pressed == 1)
+    uint32_t arr_value = __HAL_TIM_GET_AUTORELOAD(&htim1) + 1;
+    uint32_t brightness = arr_value * sinf(4 * HAL_GetTick()/1000.f)-1;
+    __HAL_TIM_SetCompare(&htim1,TIM_CHANNEL_2,brightness);
+
+    if (HAL_GPIO_ReadPin(BUTTON_GPIO_Port,BUTTON_Pin)==GPIO_PIN_SET)
     {
-      currentPressTime = HAL_GetTick();
-      if (currentPressTime - lastPressTime > 200)
-      {
-        counter++;
-        lastPressTime = currentPressTime;
-        if (CurrentLight==0)
-        {
-          HAL_GPIO_WritePin(LED_R_GPIO_Port,LED_R_Pin,GPIO_PIN_SET);  // Turn off RED
-          HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET);  //Turn on GREEN
-          CurrentLight=1;
-        }
-        else
-        {
-          HAL_GPIO_WritePin(LED_G_GPIO_Port,LED_G_Pin,GPIO_PIN_SET);  // Turn off GREEN
-          HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_RESET);  //Turn on RED
-          CurrentLight=0;
-        }
-      }
+      HAL_IWDG_Refresh(&hiwdg);
     }
-    ticks=HAL_GetTick();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -147,8 +138,9 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 6;
