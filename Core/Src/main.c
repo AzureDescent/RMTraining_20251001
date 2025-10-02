@@ -18,9 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
 #include "iwdg.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -103,22 +103,17 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM1_Init();
   MX_IWDG_Init();
+  MX_UART8_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start_IT(&htim1);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  uint8_t tx_msg[] = "RoboMaster";
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
-  { //This is a git trial.
-    uint32_t arr_value = __HAL_TIM_GET_AUTORELOAD(&htim1) + 1;
-    uint32_t brightness = arr_value * sinf(4 * HAL_GetTick()/1000.f)-1;
-    __HAL_TIM_SetCompare(&htim1,TIM_CHANNEL_2,brightness);
-    if (HAL_GPIO_ReadPin(BUTTON_GPIO_Port,BUTTON_Pin)==GPIO_PIN_SET)
-    {
-      HAL_IWDG_Refresh(&hiwdg);
-    }
+  {
+    HAL_UART_Transmit(&huart8, tx_msg, 10, 1000);
+    HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
