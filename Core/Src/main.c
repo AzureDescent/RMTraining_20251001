@@ -56,7 +56,7 @@ CAN_TxHeaderTypeDef tx_header = {
     .IDE = CAN_ID_STD,
     .RTR = CAN_RTR_DATA,
     .DLC = 8,
-    .TransmitGlobalTime = DISABLE
+    .TransmitGlobalTime = ENABLE
 };
 CAN_FilterTypeDef can_filter = {
     .FilterActivation = ENABLE,
@@ -70,7 +70,7 @@ CAN_FilterTypeDef can_filter = {
     .FilterScale = CAN_FILTERSCALE_32BIT
 };
 uint8_t rx_data[8];
-uint8_t tx_data[8] = {0x00, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+uint8_t tx_data[8] = {0x0, 0xB5, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

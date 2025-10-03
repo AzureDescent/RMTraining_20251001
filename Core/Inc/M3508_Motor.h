@@ -19,6 +19,7 @@
     public:
         // 构造函数
         explicit M3508_Motor(float ratio = 19.2f);
+        float linearMapping(int in, int in_min, int in_max, float out_min, float out_max);
 
         // CAN接收消息回调函数
         void canRxMsgCallback(const uint8_t rx_data[8]);

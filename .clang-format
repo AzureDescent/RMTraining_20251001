@@ -24,10 +24,10 @@ BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Custom
 BreakBeforeTernaryOperators: true
 BraceWrapping:
-  AfterControlStatement: MultiLine
-  AfterEnum: false
-  AfterStruct: false
-  SplitEmptyFunction: false
+AfterControlStatement: MultiLine
+AfterEnum: false
+AfterStruct: false
+SplitEmptyFunction: false
 BreakConstructorInitializers: AfterColon
 BreakInheritanceList: AfterColon
 BreakStringLiterals: false
@@ -35,7 +35,7 @@ ColumnLimit: 120
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 4
-ContinuationIndentWidth: 4
+ContinuationIndentWidth: 0
 Cpp11BracedListStyle: false
 DerivePointerAlignment: false
 FixNamespaceComments: true
