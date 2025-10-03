@@ -25,12 +25,12 @@
         void canRxMsgCallback(const uint8_t rx_data[8]);
     };
 
-// Declare the motor instance for C++ files
-extern M3508_Motor Motor;
+    // Declare the motor instance for C++ files
+    extern M3508_Motor Motor;
 
 #else
 // For C files, declare an opaque pointer
-typedef struct M3508_Motor M3508_Motor;
+// typedef struct M3508_Motor M3508_Motor;
 #endif
 
 // C-compatible function declarations
