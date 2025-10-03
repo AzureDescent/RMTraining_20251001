@@ -1,26 +1,76 @@
-#include "main.h"
-#include "gpio.h"
-#include "tim.h"
-#include "usart.h"
+#include "M3508_Motor.h"
+#include "can.h"
 
-extern uint8_t rx_msg[4];
-extern uint8_t tx_msg[];
+extern "C" {
+    extern CAN_RxHeaderTypeDef rx_header;
+    extern CAN_TxHeaderTypeDef tx_header;
+    extern uint8_t rx_data[8];
+    extern uint8_t tx_data[8];
+}
+uint32_t can_tx_mail_box;
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-    if (GPIO_Pin == BUTTON_Pin)
-    {
-        uint32_t arr_value = __HAL_TIM_GetAutoreload(&htim1) + 1;
-        uint32_t brightness = (__HAL_TIM_GetCompare(&htim1, TIM_CHANNEL_2) + 100) % arr_value;
-        __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_2, brightness);
+extern M3508_Motor Motor;
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+    HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &rx_header, rx_data);
+    if (rx_header.StdId == 0x201) {  // Adjust ID as needed
+        Motor.canRxMsgCallback(rx_data);
     }
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if (huart == &huart8)
-    {
-        HAL_UART_Receive_IT(&huart8, rx_msg, 3);
-        HAL_UART_Transmit(&huart8, tx_msg, 10, 10000);
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim->Instance == TIM6) {
+        HAL_CAN_AddTxMessage(&hcan1, &tx_header, tx_data, &can_tx_mail_box);
     }
 }
+
+
+// #include "main.h"
+// #include "gpio.h"
+// #include "tim.h"
+// #include "usart.h"
+// #include "can.h"
+// #include "M3508_Motor.h"
+//
+// extern CAN_RxHeaderTypeDef rx_header;
+// extern CAN_TxHeaderTypeDef tx_header;
+// extern uint8_t rx_msg[8];
+// extern uint8_t tx_msg[8];
+// extern M3508_Motor Motor;
+//
+// // void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+// // {
+// //     if (hcan->Instance == CAN1)
+// //     {
+// //         HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &rx_header, rx_data);
+// //         if (rx_header.StdId == 0x201)
+// //         {
+// //             Motor.canRxMsgCallback(rx_data);
+// //         }
+// //     }
+// // }
+// // void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+// // {
+// //     if (htim->Instance == htim6.Instance)
+// //     {
+// //         HAL_CAN_AddTxMessage(&hcan1, &tx_header, tx_data, &can_tx_mail_box);
+// //     }
+// // }
+// // class M3508_Motor{
+// // private:
+// //     const float ratio_ = 19.2f;
+// //
+// //     float angle_ = 0.f;
+// //     float delta_angle_ = 0.f;
+// //     float ecd_angle_ = 0.f;
+// //     float last_ecd_angle_ = 0.f;
+// //     float delta_ecd_angle_ = 0.f;
+// //
+// //     float rotate_speed_ = 0.f;
+// //     float current_ = 0.f;
+// //     float temp_ = 0.f;
+// //
+// // public:
+// //     explicit M3508_Motor(float ratio):ratio_(ratio) {};
+// //     void canRxMsgCallback(const uint8_t rx_data[8]);
+// // };
