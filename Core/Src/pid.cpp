@@ -47,4 +47,6 @@ float PID::calc(float ref, float fdb)
 
     last_err_ = err_;
     last_dout_ = dout_;
+
+    return output_;
 }

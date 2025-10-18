@@ -2,7 +2,9 @@
 #define M3508_MOTOR_H
 
 #ifdef __cplusplus
-    #include <stdint.h>
+
+#include <stdint.h>
+#include "pid.h"
 
     class M3508_Motor{
     private:
@@ -23,6 +25,23 @@
 
         // CAN接收消息回调函数
         void canRxMsgCallback(const uint8_t rx_data[8]);
+
+        PID spid_, ppid_;
+        float target_angle_, fdb_angle_;
+        float target_speed_, fdb_speed_, feedforward_speed_;
+        float feedforward_intensity_, output_intensity_;
+        enum
+        {
+            TORQUE,
+            SPEED,
+            POSITION_SPEED,
+        }control_method_;
+
+        void SetPosition(float target_position, float feedforward_speed, float feedforward_intensity);
+        void SetSpeed(float target_speed, float feedforward_intensity);
+        void SetIntensity(float intensity);
+
+        void handle();
     };
 
     // Declare the motor instance for C++ files
