@@ -42,6 +42,8 @@
         void SetIntensity(float intensity);
 
         void handle();
+
+        float FeedforwardIntensityCalc(float current_speed);
     };
 
     // Declare the motor instance for C++ files

@@ -1,5 +1,4 @@
 #include "M3508_Motor.h"
-#include <math.h>
 
 // Define the motor instance
 M3508_Motor Motor(19.2f);
@@ -88,6 +87,11 @@ void M3508_Motor::handle()
         output_intensity_ = spid_.calc(target_speed_, rotate_speed_) + feedforward_intensity_;
         break;
     }
+}
+
+float M3508_Motor::FeedforwardIntensityCalc(float current_speed)
+{
+    //return;
 }
 
 // C-compatible wrapper function
