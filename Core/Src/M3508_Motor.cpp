@@ -32,11 +32,11 @@ void M3508_Motor::canRxMsgCallback(const uint8_t rx_data[8]) {
 
     delta_ecd_angle_ = ecd_angle_ - last_ecd_angle_;
     if (delta_ecd_angle_ > 180.0f) {
-            delta_ecd_angle_ -= 360.0f;
+        delta_ecd_angle_ -= 360.0f;
     } else if (delta_ecd_angle_ < -180.0f) {
-            delta_ecd_angle_ += 360.0f;
+        delta_ecd_angle_ += 360.0f;
     }
-
+    
     delta_angle_ = delta_ecd_angle_ / ratio_;
     angle_ += delta_angle_;
     last_ecd_angle_ = ecd_angle_;
