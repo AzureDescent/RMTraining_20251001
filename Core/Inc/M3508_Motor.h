@@ -43,7 +43,7 @@
 
         void handle();
 
-        float FeedforwardIntensityCalc(float current_speed);
+        float FeedforwardIntensityCalc(float current_angle);
     };
 
     // Declare the motor instance for C++ files

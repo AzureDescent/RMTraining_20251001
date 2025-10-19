@@ -1,5 +1,10 @@
 #include "M3508_Motor.h"
+#include <cmath>
 
+#define PI 3.1415926f
+#define G 9.81f
+#define MASS 0.5f
+#define ARMFORCE_LENGTH 0.05524f
 // Define the motor instance
 M3508_Motor Motor(19.2f);
 
@@ -75,23 +80,34 @@ void M3508_Motor::handle()
     switch (control_method_)
     {
     case TORQUE:
+        feedforward_intensity_ = FeedforwardIntensityCalc(angle_);
         output_intensity_ = feedforward_intensity_;
         break;
 
     case SPEED:
+        feedforward_intensity_ = FeedforwardIntensityCalc(target_angle_);
         output_intensity_ = spid_.calc(target_speed_, rotate_speed_) + feedforward_intensity_;
         break;
 
     case POSITION_SPEED:
+        feedforward_intensity_ = FeedforwardIntensityCalc(target_angle_);
         target_speed_ = ppid_.calc(target_angle_, angle_) + feedforward_speed_;
         output_intensity_ = spid_.calc(target_speed_, rotate_speed_) + feedforward_intensity_;
         break;
     }
 }
 
-float M3508_Motor::FeedforwardIntensityCalc(float current_speed)
+float M3508_Motor::FeedforwardIntensityCalc(float current_angle)
 {
-    //return;
+    float current_angle_rad = current_angle * PI / 180.0f;
+    float load_gravity_torque = MASS * G * ARMFORCE_LENGTH * cosf(current_angle_rad);
+    const float kt = 0.3f;
+
+    float motor_gravity_torque = load_gravity_torque / ratio_;
+    // float friction_torque = (current_ > 0) ? 0.1f : ((current_ < 0) ? -0.1f : 0.0f);
+    float total_gravity_intensity = motor_gravity_torque;
+
+    return total_gravity_intensity / kt;
 }
 
 // C-compatible wrapper function
