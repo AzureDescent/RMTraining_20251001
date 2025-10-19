@@ -28,7 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include <math.h>
 #include <string.h>
-#include <M3508_Motor.h>
+#include "M3508_Motor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -70,7 +70,7 @@ CAN_FilterTypeDef can_filter = {
     .FilterScale = CAN_FILTERSCALE_32BIT
 };
 uint8_t rx_data[8];
-uint8_t tx_data[8] = {0x0, 0xB5, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+uint8_t tx_data[8] = {0x0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -81,6 +81,7 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void M3508_Motor_RxCallback(const uint8_t rx_data[8]);
+
 /* USER CODE END 0 */
 
 /**
@@ -120,13 +121,15 @@ int main(void)
   HAL_CAN_Start(&hcan1);
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
   HAL_TIM_Base_Start_IT(&htim6);
+
+  M3508_Motor_SetTorqueMode();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      HAL_Delay(1000);
+      HAL_Delay(1);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
