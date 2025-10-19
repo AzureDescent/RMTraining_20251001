@@ -18,6 +18,9 @@
         float current_;              // 电流
         float temp_;                 // 温度
 
+        int16_t ecd_value_;
+        int16_t last_ecd_value_;
+
     public:
         // 构造函数
         explicit M3508_Motor(float ratio = 19.2f);
@@ -60,7 +63,10 @@ extern "C" {
     #endif
 
     void m3508_motor_rx_callback(const uint8_t rx_data[8]);
-    // Add other C-compatible functions here if needed
+
+    void M3508_Motor_SetTorqueMode(void);
+    void M3508_Motor_Handle(void);
+    int16_t M3508_Motor_GetOutputIntensity(void);
 
     #ifdef __cplusplus
 }
