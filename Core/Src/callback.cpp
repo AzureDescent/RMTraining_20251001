@@ -1,6 +1,9 @@
 #include "M3508_Motor.h"
 #include "can.h"
 
+extern float target_angle;
+extern uint32_t can_tx_mailbox;
+
 extern "C" {
     extern CAN_RxHeaderTypeDef rx_header;
     extern CAN_TxHeaderTypeDef tx_header;
@@ -25,6 +28,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM6)
     {
+        Motor.SetPosition(target_angle, 0.0f, 0.0f);
+
         M3508_Motor_Handle();
 
         int16_t intensity_to_send = M3508_Motor_GetOutputIntensity();
