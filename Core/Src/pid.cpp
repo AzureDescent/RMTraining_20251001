@@ -3,6 +3,8 @@
 //
 #include "pid.h"
 
+extern float target_angle;
+
 PID::PID(float kp, float ki, float kd, float i_max, float out_max,float d_filter_k):
     kp_(kp), ki_(ki), kd_(kd), i_max_(i_max), out_max_(out_max),
     d_filter_k_(d_filter_k), output_(0.0f), ref_(0.0f), fdb_(0.0f),

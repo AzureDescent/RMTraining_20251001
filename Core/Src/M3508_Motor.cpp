@@ -5,8 +5,12 @@
 #define G 9.81f
 #define MASS 0.5f
 #define ARMFORCE_LENGTH 0.05524f
-#define MAX_INTESITY 16384.0f
+#define MAX_INTENSITY 16384.0f
 #define MAX_CURRENT 20.0f
+#define HALF_ECD 4096
+#define MAX_ECD 8192
+
+extern float target_angle;
 // Define the motor instance
 M3508_Motor Motor(19.2f);
 
@@ -15,9 +19,9 @@ M3508_Motor Motor(19.2f);
 M3508_Motor::M3508_Motor(float ratio)
     : ratio_(ratio), angle_(0.0f), delta_angle_(0.0f),
       ecd_angle_(0.0f), last_ecd_angle_(0.0f), delta_ecd_angle_(0.0f),
-      rotate_speed_(0.0f), current_(0.0f), temp_(0.0f),
-      spid_(10.0f, 0.5f, 0.1f, 50.0f, 100.0f),
-      ppid_(5.0f, 0.3f, 0.05f, 30.0f, 100.0f),
+      rotate_speed_(0.0f), current_(0.0f), temp_(0.0f), ecd_value_(0.0f), last_ecd_value_(0.0f),
+      spid_(10.0f, 0.5f, 0.1f, 50.0f, MAX_INTENSITY),
+      ppid_(0.8f, 0.005f, 0.1f, 50.0f, 200.0f),
       target_angle_(0.0f), fdb_angle_(0.0f),
       target_speed_(0.0f), fdb_speed_(0.0f), feedforward_speed_(0.0f),
       feedforward_intensity_(0.0f), output_intensity_(0.0f),
@@ -42,10 +46,16 @@ void M3508_Motor::canRxMsgCallback(const uint8_t rx_data[8]) {
 
     ecd_value_ = raw_ecd_value;
 
-    int16_t delta_ecd_value = ecd_value_ - last_ecd_value_;
+    if (!first_data_received_) {
+        // 确保在第一次收到数据时，不计算大的delta_angle_
+        last_ecd_value_ = ecd_value_;
+        first_data_received_ = true;
+        angle_ = 0.0f; // 确保累积角从0开始
+        fdb_angle_ = 0.0f;
+        return; // 第一次收到数据直接退出，不计算运动量
+    }
 
-    const int16_t HALF_ECD = 4096; // 8192 / 2
-    const int16_t MAX_ECD = 8192; // 编码器总刻度
+    int16_t delta_ecd_value = ecd_value_ - last_ecd_value_;
 
     if (delta_ecd_value > HALF_ECD) {
         delta_ecd_value -= MAX_ECD;
@@ -59,6 +69,7 @@ void M3508_Motor::canRxMsgCallback(const uint8_t rx_data[8]) {
     angle_ += delta_angle_;
 
     last_ecd_value_ = ecd_value_;
+    fdb_angle_ = angle_;
 }
 
 void M3508_Motor::SetIntensity(float intensity)
@@ -106,7 +117,7 @@ void M3508_Motor::handle()
 
 float M3508_Motor::FeedforwardIntensityCalc(float current_angle)
 {
-    const float INTENSITY_PER_AMP = MAX_INTESITY / MAX_CURRENT;
+    const float INTENSITY_PER_AMP = MAX_INTENSITY / MAX_CURRENT;
     float current_angle_rad = current_angle * PI / 180.0f;
     float load_gravity_torque = MASS * G * ARMFORCE_LENGTH * sinf(current_angle_rad);
     const float kt_motor = 0.3f;
@@ -124,9 +135,9 @@ extern "C" void M3508_Motor_RxCallback(const uint8_t rx_data[8])
     Motor.canRxMsgCallback(rx_data);
 }
 
-extern "C" void M3508_Motor_SetTorqueMode(void)
+extern "C" void M3508_Motor_SetPositionSpeedMode(void)
 {
-    Motor.control_method_ = M3508_Motor::TORQUE;
+    Motor.control_method_ = M3508_Motor::POSITION_SPEED;
 }
 
 extern "C" void M3508_Motor_Handle(void)
@@ -136,4 +147,15 @@ extern "C" void M3508_Motor_Handle(void)
 
 extern "C" int16_t M3508_Motor_GetOutputIntensity(void) {
     return (int16_t)Motor.output_intensity_;
+}
+
+void M3508_Motor::resetAngle(void)
+{
+    angle_ = 0.0f;
+    fdb_angle_ = 0.0f;
+}
+
+extern "C" void M3508_Motor_ResetAngle(void)
+{
+    Motor.resetAngle();
 }

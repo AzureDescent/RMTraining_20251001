@@ -71,6 +71,10 @@ CAN_FilterTypeDef can_filter = {
 };
 uint8_t rx_data[8];
 uint8_t tx_data[8] = {0x0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+float target_angle = 0.0f;
+
+uint32_t can_tx_mailbox;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -122,7 +126,12 @@ int main(void)
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
   HAL_TIM_Base_Start_IT(&htim6);
 
-  M3508_Motor_SetTorqueMode();
+  M3508_Motor_SetPositionSpeedMode();
+
+  HAL_Delay(10);
+  M3508_Motor_ResetAngle();
+
+  target_angle = 10.0f;
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -1,6 +1,9 @@
 #include "M3508_Motor.h"
 #include "can.h"
 
+extern float target_angle;
+extern uint32_t can_tx_mailbox;
+
 extern "C" {
     extern CAN_RxHeaderTypeDef rx_header;
     extern CAN_TxHeaderTypeDef tx_header;
@@ -11,16 +14,22 @@ uint32_t can_tx_mail_box;
 
 extern M3508_Motor Motor;
 
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-    HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &rx_header, rx_data);
-    if (rx_header.StdId == 0x201) {  // Adjust ID as needed
-        Motor.canRxMsgCallback(rx_data);
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+    if (hcan->Instance == CAN1)
+    {
+        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, rx_data);
+        if (rx_header.StdId == 0x201) {  // Adjust ID as needed
+            Motor.canRxMsgCallback(rx_data);
+        }
     }
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM6)
     {
+        Motor.SetPosition(target_angle, 0.0f, 0.0f);
+
         M3508_Motor_Handle();
 
         int16_t intensity_to_send = M3508_Motor_GetOutputIntensity();
@@ -32,7 +41,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
             tx_data[i] = 0;
         }
 
-        uint32_t TxMailbox;
-        HAL_CAN_AddTxMessage(&hcan1, &tx_header, tx_data, &TxMailbox);
+        HAL_CAN_AddTxMessage(&hcan1, &tx_header, tx_data, &can_tx_mailbox);
     }
 }
