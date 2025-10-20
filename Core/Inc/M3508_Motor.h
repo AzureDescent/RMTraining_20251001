@@ -62,7 +62,7 @@
 extern "C" {
     #endif
 
-    void m3508_motor_rx_callback(const uint8_t rx_data[8]);
+    void M3508_Motor_RxCallback(const uint8_t rx_data[8]);
 
     void M3508_Motor_SetTorqueMode(void);
     void M3508_Motor_Handle(void);

@@ -71,6 +71,8 @@ CAN_FilterTypeDef can_filter = {
 };
 uint8_t rx_data[8];
 uint8_t tx_data[8] = {0x0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+uint32_t can_tx_mailbox;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
