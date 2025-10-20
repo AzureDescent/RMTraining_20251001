@@ -47,6 +47,8 @@
         void handle();
 
         float FeedforwardIntensityCalc(float current_angle);
+
+        void Stop();
     };
 
     // Declare the motor instance for C++ files
@@ -67,6 +69,8 @@ extern "C" {
     void M3508_Motor_SetTorqueMode(void);
     void M3508_Motor_Handle(void);
     int16_t M3508_Motor_GetOutputIntensity(void);
+
+    void M3508_Motor_Stop(void);
 
     #ifdef __cplusplus
 }

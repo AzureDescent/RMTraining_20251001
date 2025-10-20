@@ -120,6 +120,13 @@ float M3508_Motor::FeedforwardIntensityCalc(float current_angle)
     return total_gravity_intensity;
 }
 
+void M3508_Motor::Stop()
+{
+    target_angle_ = angle_;
+    target_speed_ = 0.0f;
+    feedforward_intensity_ = 0.0f;
+    output_intensity_ = 0.0f;
+}
 // C-compatible wrapper function
 extern "C" void M3508_Motor_RxCallback(const uint8_t rx_data[8])
 {
@@ -147,4 +154,9 @@ extern "C" int16_t M3508_Motor_GetOutputIntensity(void)
         return (int16_t)-MAX_INTENSITY;
     }
     return (int16_t)Motor.output_intensity_;
+}
+
+extern "C" void M3508_Motor_Stop()
+{
+    Motor.Stop();
 }

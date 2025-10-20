@@ -400,6 +400,26 @@
               <FilePath>..\Core\Src\callback.cpp</FilePath>
             </File>
             <File>
+              <FileName>M3508_Motor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\M3508_Motor.h</FilePath>
+            </File>
+            <File>
+              <FileName>M3508_Motor.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Core\Src\M3508_Motor.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>pid.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Core\Src\pid.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>pid.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\pid.h</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/main.c</FilePath>
@@ -642,26 +662,6 @@
               <FileName>stm32f4xx_hal_msp.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32f4xx_hal_msp.c</FilePath>
-            </File>
-            <File>
-              <FileName>M3508_Motor.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Inc\M3508_Motor.h</FilePath>
-            </File>
-            <File>
-              <FileName>M3508_Motor.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\Core\Src\M3508_Motor.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>pid.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\Core\Src\pid.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>pid.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Inc\pid.h</FilePath>
             </File>
           </Files>
         </Group>

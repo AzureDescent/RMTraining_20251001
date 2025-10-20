@@ -73,6 +73,9 @@ uint8_t rx_data[8];
 uint8_t tx_data[8] = {0x0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 uint32_t can_tx_mailbox;
+
+float target_angle = 10.0f;
+uint8_t stop_flag = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -84,6 +87,49 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 void M3508_Motor_RxCallback(const uint8_t rx_data[8]);
 
+void Key_Process(void)
+{
+    if (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET)
+    {
+        HAL_Delay(40);  // 消抖
+        if (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET)
+        {
+            // 切换状态
+            stop_flag = !stop_flag;
+
+            // 如果切换到停止状态，立即停止电机
+            if (stop_flag == 1)
+            {
+                M3508_Motor_Stop();
+            }
+
+            // 等待按键释放
+            while (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET)
+            {
+                HAL_Delay(10);  // 在等待期间也要处理其他事务
+            }
+        }
+    }
+}
+
+void Motor_Control_Update(void)
+{
+    static uint8_t last_stop_flag = 1;
+
+    if (stop_flag != last_stop_flag)
+    {
+        if (stop_flag == 1)
+        {
+          M3508_Motor_Stop();  // 任何情况下stop_flag变为1都停止电机
+        }
+        last_stop_flag = stop_flag;
+    }
+
+    if (stop_flag == 0)
+    {
+      M3508_Motor_SetTorqueMode();
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -125,13 +171,17 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim6);
 
   M3508_Motor_SetTorqueMode();
+
+  M3508_Motor_Stop();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      HAL_Delay(1);
+      Key_Process();
+      Motor_Control_Update();
+      HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
