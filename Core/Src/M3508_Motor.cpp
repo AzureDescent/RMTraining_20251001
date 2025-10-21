@@ -34,8 +34,8 @@ float M3508_Motor::linearMapping(int in, int in_min, int in_max, float out_min, 
 }
 
 // CAN message callback
-void M3508_Motor::canRxMsgCallback(const uint8_t rx_data[8]) {
-    // 1. 原始数据提取
+void M3508_Motor::canRxMsgCallback(const uint8_t rx_data[8])
+{
     int16_t raw_ecd_value = (rx_data[0] << 8) | rx_data[1];
     int16_t raw_rotate_speed = (rx_data[2] << 8) | rx_data[3];
     int16_t raw_current = (rx_data[4] << 8) | rx_data[5];
@@ -127,11 +127,8 @@ void M3508_Motor::Stop()
     feedforward_intensity_ = 0.0f;
     output_intensity_ = 0.0f;
 }
+
 // C-compatible wrapper function
-extern "C" void M3508_Motor_RxCallback(const uint8_t rx_data[8])
-{
-    Motor.canRxMsgCallback(rx_data);
-}
 
 extern "C" void M3508_Motor_SetTorqueMode(void)
 {

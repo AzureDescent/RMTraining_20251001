@@ -75,7 +75,7 @@ uint8_t tx_data[8] = {0x0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 uint32_t can_tx_mailbox;
 
 float target_angle = 10.0f;
-uint8_t stop_flag = 1;
+uint8_t stop_flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -85,8 +85,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void M3508_Motor_RxCallback(const uint8_t rx_data[8]);
-
 void Key_Process(void)
 {
     if (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET)
@@ -176,7 +174,6 @@ int main(void)
   {
       Key_Process();
       Motor_Control_Update();
-      HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
