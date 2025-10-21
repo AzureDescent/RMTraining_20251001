@@ -29,24 +29,18 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM6)
     {
+        int16_t intensity_to_send=0;
+
         if (stop_flag == 0)
         {
-            Motor.SetPosition(target_angle, 0.0f, 0.0f);
+            M3508_Motor_SetTorqueMode();
             M3508_Motor_Handle();
+
+            intensity_to_send = M3508_Motor_GetOutputIntensity();
         }
         else
         {
             M3508_Motor_Stop();
-        }
-
-        int16_t intensity_to_send;
-        if (stop_flag == 1)
-        {
-            intensity_to_send = 0;
-        }
-        else
-        {
-            intensity_to_send = M3508_Motor_GetOutputIntensity();
         }
 
         tx_data[0] = (uint8_t)(intensity_to_send>>8);

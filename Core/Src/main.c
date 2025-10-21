@@ -120,14 +120,13 @@ void Motor_Control_Update(void)
     {
         if (stop_flag == 1)
         {
-          M3508_Motor_Stop();  // 任何情况下stop_flag变为1都停止电机
+            M3508_Motor_Stop();  // 任何情况下stop_flag变为1都停止电机
+        }
+        else
+        {
+            M3508_Motor_SetTorqueMode();
         }
         last_stop_flag = stop_flag;
-    }
-
-    if (stop_flag == 0)
-    {
-      M3508_Motor_SetTorqueMode();
     }
 }
 /* USER CODE END 0 */
