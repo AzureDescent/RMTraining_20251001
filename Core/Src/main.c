@@ -104,10 +104,7 @@ void Key_Process(void)
             }
 
             // 等待按键释放
-            while (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET)
-            {
-                HAL_Delay(10);  // 在等待期间也要处理其他事务
-            }
+            while (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET);
         }
     }
 }
@@ -159,7 +156,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_IWDG_Init();
   MX_UART8_Init();
   MX_CAN1_Init();
   MX_TIM6_Init();
