@@ -20,8 +20,8 @@ M3508_Motor::M3508_Motor(float ratio)
       ecd_angle_(0.0f), last_ecd_angle_(0.0f), delta_ecd_angle_(0.0f),
       rotate_speed_(0.0f), current_(0.0f), temp_(0.0f),
       ecd_value_(0.0f), last_ecd_value_(0.0f),
-      spid_(10.0f, 0.5f, 0.1f, 50.0f, 100.0f),
-      ppid_(5.0f, 0.3f, 0.05f, 30.0f, 100.0f),
+      spid_(5.0f, 0.3f, 0.05f, 30.0f, 100.0f, 1.0f),
+      ppid_(10.0f, 0.5f, 0.1f, 50.0f, 100.0f, 1.0f),
       target_angle_(0.0f), fdb_angle_(0.0f),
       target_speed_(0.0f), fdb_speed_(0.0f), feedforward_speed_(0.0f),
       feedforward_intensity_(0.0f), output_intensity_(0.0f),
@@ -34,8 +34,8 @@ float M3508_Motor::linearMapping(int in, int in_min, int in_max, float out_min, 
 }
 
 // CAN message callback
-void M3508_Motor::canRxMsgCallback(const uint8_t rx_data[8]) {
-    // 1. 原始数据提取
+void M3508_Motor::canRxMsgCallback(const uint8_t rx_data[8])
+{
     int16_t raw_ecd_value = (rx_data[0] << 8) | rx_data[1];
     int16_t raw_rotate_speed = (rx_data[2] << 8) | rx_data[3];
     int16_t raw_current = (rx_data[4] << 8) | rx_data[5];
@@ -54,13 +54,15 @@ void M3508_Motor::canRxMsgCallback(const uint8_t rx_data[8]) {
         delta_ecd_value += MAX_ECD;
     }
 
-    const float DEG_PER_ECD = 360.0f / MAX_ECD;
-    delta_angle_ = (float)delta_ecd_value * DEG_PER_ECD / ratio_;
+    const float deg_per_ecd = 360.0f / MAX_ECD;
+    delta_angle_ = (float)delta_ecd_value * deg_per_ecd / ratio_;
 
     angle_ += delta_angle_;
 
     last_ecd_value_ = ecd_value_;
+
     fdb_angle_ = angle_;
+    fdb_speed_ = rotate_speed_;
 }
 
 void M3508_Motor::SetIntensity(float intensity)
@@ -94,12 +96,12 @@ void M3508_Motor::handle()
         break;
 
     case SPEED:
-        feedforward_intensity_ = FeedforwardIntensityCalc(target_angle_);
+        feedforward_intensity_ = FeedforwardIntensityCalc(angle_);
         output_intensity_ = spid_.calc(target_speed_, rotate_speed_) + feedforward_intensity_;
         break;
 
     case POSITION_SPEED:
-        feedforward_intensity_ = FeedforwardIntensityCalc(target_angle_);
+        feedforward_intensity_ = FeedforwardIntensityCalc(angle_);
         target_speed_ = ppid_.calc(target_angle_, angle_) + feedforward_speed_;
         output_intensity_ = spid_.calc(target_speed_, rotate_speed_) + feedforward_intensity_;
         break;
@@ -108,14 +110,14 @@ void M3508_Motor::handle()
 
 float M3508_Motor::FeedforwardIntensityCalc(float current_angle)
 {
-    const float INTENSITY_PER_AMP = MAX_INTENSITY / MAX_CURRENT;
+    const float intensity_per_amp = MAX_INTENSITY / MAX_CURRENT;
     float current_angle_rad = current_angle * PI / 180.0f;
     float load_gravity_torque = MASS * G * ARMFORCE_LENGTH * sinf(current_angle_rad);
     const float kt_motor = 0.3f;
 
     float motor_gravity_torque = load_gravity_torque / ratio_;
     float motor_current = motor_gravity_torque / kt_motor;
-    float total_gravity_intensity = motor_current * INTENSITY_PER_AMP;
+    float total_gravity_intensity = motor_current * intensity_per_amp;
 
     return total_gravity_intensity;
 }
@@ -127,6 +129,21 @@ void M3508_Motor::Stop()
     feedforward_intensity_ = 0.0f;
     output_intensity_ = 0.0f;
 }
+
+void M3508_Motor::SetPositionPID(float kp, float ki, float kd)
+{
+    ppid_.kp_ = kp;
+    ppid_.ki_ = ki;
+    ppid_.kd_ = kd;
+}
+
+void M3508_Motor::SetSpeedPID(float kp, float ki, float kd)
+{
+    spid_.kp_ = kp;
+    spid_.ki_ = ki;
+    spid_.kd_ = kd;
+}
+
 // C-compatible wrapper function
 extern "C" void M3508_Motor_RxCallback(const uint8_t rx_data[8])
 {
@@ -136,6 +153,16 @@ extern "C" void M3508_Motor_RxCallback(const uint8_t rx_data[8])
 extern "C" void M3508_Motor_SetTorqueMode(void)
 {
     Motor.control_method_ = M3508_Motor::TORQUE;
+}
+
+extern "C" void M3508_Motor_SetSpeedMode(void)
+{
+    Motor.control_method_ = M3508_Motor::SPEED;
+}
+
+extern "C" void M3508_Motor_SetPositionSpeedMode(void)
+{
+    Motor.control_method_ = M3508_Motor::POSITION_SPEED;
 }
 
 extern "C" void M3508_Motor_Handle(void)
@@ -159,4 +186,10 @@ extern "C" int16_t M3508_Motor_GetOutputIntensity(void)
 extern "C" void M3508_Motor_Stop()
 {
     Motor.Stop();
+}
+
+extern "C" void M3508_Motor_SetPID(float p_p, float p_i, float p_d, float s_p, float s_i, float s_d)
+{
+    Motor.SetPositionPID(p_p, p_i, p_d);
+    Motor.SetSpeedPID(s_p, s_i, s_d);
 }

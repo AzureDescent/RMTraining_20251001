@@ -11,7 +11,7 @@ PID::PID(float kp, float ki, float kd, float i_max, float out_max,float d_filter
     err_(0.0f), err_sum_(0.0f), last_err_(0.0f), pout_(0.0f), iout_(0.0f),
     dout_(0.0f), last_dout_(0.0f) {}
 
-void PID::reset(void)
+void PID::reset()
 {
     err_ = 0.0f;
     err_sum_ = 0.0f;

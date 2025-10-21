@@ -49,6 +49,9 @@
         float FeedforwardIntensityCalc(float current_angle);
 
         void Stop();
+
+        void SetPositionPID(float kp, float ki, float kd);
+        void SetSpeedPID(float kp, float ki, float kd);
     };
 
     // Declare the motor instance for C++ files
@@ -66,11 +69,16 @@ extern "C" {
 
     void M3508_Motor_RxCallback(const uint8_t rx_data[8]);
 
-    void M3508_Motor_SetTorqueMode(void);
     void M3508_Motor_Handle(void);
     int16_t M3508_Motor_GetOutputIntensity(void);
 
     void M3508_Motor_Stop(void);
+
+    void M3508_Motor_SetTorqueMode(void);
+    void M3508_Motor_SetSpeedMode(void);
+    void M3508_Motor_SetPositionSpeedMode(void);
+
+    void M3508_Motor_SetPID(float p_p, float p_i, float p_d, float s_p, float s_i, float s_d);
 
     #ifdef __cplusplus
 }

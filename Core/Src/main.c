@@ -29,6 +29,7 @@
 #include <math.h>
 #include <string.h>
 #include "M3508_Motor.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -74,8 +75,12 @@ uint8_t tx_data[8] = {0x0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 uint32_t can_tx_mailbox;
 
-float target_angle = 10.0f;
+float target_angle = 0.0f;
 uint8_t stop_flag = 1;
+
+uint8_t step_test_enabled = 0;
+uint32_t step_test_start_time = 0;
+float step_initial_angle = 0.0f;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,40 +99,42 @@ void Key_Process(void)
         HAL_Delay(40);  // 消抖
         if (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET)
         {
-            // 切换状态
             stop_flag = !stop_flag;
 
-            // 如果切换到停止状态，立即停止电机
             if (stop_flag == 1)
             {
                 M3508_Motor_Stop();
             }
 
-            // 等待按键释放
             while (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET)
-            {
-                HAL_Delay(10);  // 在等待期间也要处理其他事务
-            }
         }
     }
 }
 
-void Motor_Control_Update(void)
+void Step_Response_Test(void)
 {
     static uint8_t last_stop_flag = 1;
 
-    if (stop_flag != last_stop_flag)
+    if (stop_flag == 0 && last_stop_flag == 1)
     {
-        if (stop_flag == 1)
-        {
-            M3508_Motor_Stop();  // 任何情况下stop_flag变为1都停止电机
-        }
-        else
-        {
-            M3508_Motor_SetTorqueMode();
-        }
-        last_stop_flag = stop_flag;
+        step_test_start_time = HAL_GetTick();
+        step_initial_angle = target_angle;
+        step_test_enabled = 1;
     }
+
+    if (stop_flag == 0 && step_test_enabled)
+    {
+        uint32_t current_time = HAL_GetTick();
+        if (current_time - step_test_start_time > 10000)
+        {
+            target_angle = step_initial_angle + 10.0f;
+            step_test_enabled = 0;
+
+            printf("Step test: %.1f -> %.1f deg\n", step_initial_angle, target_angle);
+        }
+    }
+
+    last_stop_flag = stop_flag;
 }
 /* USER CODE END 0 */
 
@@ -147,7 +154,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+    target_angle = 0.0f;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -169,7 +176,18 @@ int main(void)
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
   HAL_TIM_Base_Start_IT(&htim6);
 
-  M3508_Motor_SetTorqueMode();
+  float position_kp = 10.0f;
+  float position_ki = 0.5f;
+  float position_kd = 0.1f;
+
+  float speed_kp = 5.0f;
+  float speed_ki = 0.3f;
+  float speed_kd = 0.05f;
+
+  M3508_Motor_SetPID(position_kp, position_ki, position_kd, speed_kp, speed_ki, speed_kd);
+
+
+  M3508_Motor_SetPositionSpeedMode();
 
   M3508_Motor_Stop();
   /* USER CODE END 2 */
@@ -179,7 +197,8 @@ int main(void)
   while (1)
   {
       Key_Process();
-      Motor_Control_Update();
+      Step_Response_Test();
+
       HAL_Delay(10);
     /* USER CODE END WHILE */
 

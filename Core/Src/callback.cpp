@@ -33,7 +33,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
         if (stop_flag == 0)
         {
-            M3508_Motor_SetTorqueMode();
+            // switch (Motor.control_method_)
+            // {
+            // case Motor.TORQUE:
+            //     M3508_Motor_SetTorqueMode();
+            //     break;
+            // case Motor.SPEED:
+            //     M3508_Motor_SetSpeedMode();
+            //     Motor.SetSpeed(target_angle, 0.0f);
+            //     break;
+            // case Motor.POSITION_SPEED:
+            //     M3508_Motor_SetPositionSpeedMode();
+            //     Motor.SetPosition(target_angle, 0.0f, 0.0f);
+            //     break;
+            // default:
+            //     M3508_Motor_SetPositionSpeedMode();
+            //     Motor.SetPosition(target_angle, 0.0f, 0.0f);
+            //     break;
+            // }
+            Motor.SetPosition(target_angle, 0.0f, 0.0f);
             M3508_Motor_Handle();
 
             intensity_to_send = M3508_Motor_GetOutputIntensity();
