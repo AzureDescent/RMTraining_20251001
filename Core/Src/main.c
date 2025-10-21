@@ -75,7 +75,7 @@ uint8_t tx_data[8] = {0x0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 uint32_t can_tx_mailbox;
 
-float target_angle = 0.0f;
+float target_angle = 10.0f;
 uint8_t stop_flag = 1;
 
 uint8_t step_test_enabled = 0;
@@ -106,7 +106,7 @@ void Key_Process(void)
                 M3508_Motor_Stop();
             }
 
-            while (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET)
+            while (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET);
         }
     }
 }
@@ -125,7 +125,7 @@ void Step_Response_Test(void)
     if (stop_flag == 0 && step_test_enabled)
     {
         uint32_t current_time = HAL_GetTick();
-        if (current_time - step_test_start_time > 10000)
+        if (current_time - step_test_start_time > 2000)
         {
             target_angle = step_initial_angle + 10.0f;
             step_test_enabled = 0;
@@ -154,7 +154,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-    target_angle = 0.0f;
+    target_angle = 10.0f;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -166,7 +166,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_IWDG_Init();
   MX_UART8_Init();
   MX_CAN1_Init();
   MX_TIM6_Init();
