@@ -144,11 +144,7 @@ void M3508_Motor::SetSpeedPID(float kp, float ki, float kd)
     spid_.kd_ = kd;
 }
 
-// C-compatible wrapper function
-extern "C" void M3508_Motor_RxCallback(const uint8_t rx_data[8])
-{
-    Motor.canRxMsgCallback(rx_data);
-}
+// C-compatible wrapper functions
 
 extern "C" void M3508_Motor_SetTorqueMode(void)
 {

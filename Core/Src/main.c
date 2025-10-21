@@ -90,8 +90,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void M3508_Motor_RxCallback(const uint8_t rx_data[8]);
-
 void Key_Process(void)
 {
     if (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET)
@@ -154,7 +152,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-    target_angle = 10.0f;
+    target_angle = 30.0f;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -175,13 +173,13 @@ int main(void)
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
   HAL_TIM_Base_Start_IT(&htim6);
 
-  float position_kp = 10.0f;
-  float position_ki = 0.5f;
-  float position_kd = 0.1f;
+  float position_kp = 0.0f;
+  float position_ki = 0.0f;
+  float position_kd = 0.0f;
 
-  float speed_kp = 5.0f;
-  float speed_ki = 0.3f;
-  float speed_kd = 0.05f;
+  float speed_kp = 1.0f;
+  float speed_ki = 0.0f;
+  float speed_kd = 0.0f;
 
   M3508_Motor_SetPID(position_kp, position_ki, position_kd, speed_kp, speed_ki, speed_kd);
 
@@ -195,10 +193,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      Key_Process();
-      Step_Response_Test();
-
-      HAL_Delay(10);
+      // Key_Process();
+      // Step_Response_Test();
+      //
+      // HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
